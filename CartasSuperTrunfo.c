@@ -1,104 +1,204 @@
 #include <stdio.h>
+#include <string.h>
 
-// Desafio Super Trunfo - Países
-// Tema 1 - Cadastro das cartas
-// Objetivo: No nível novato você deve criar as cartas representando as cidades
-// utilizando scanf para entrada de dados e printf para exibir as informações.
+/*
+  Super Trunfo — Comparação por 1 atributo (nível básico)
 
-int main() {
-  // ===============================
-  // Área para definição das variáveis
-  // ===============================
-  // Cada variável vai armazenar uma propriedade da cidade
-  char estado1, estado2;          // Letra do estado (A-H)
-  char codigo1[4], codigo2[4];    // Código da carta (ex.: A01)
-  char cidade1[60], cidade2[60];  // Nome da cidade
-  int populacao1, populacao2;     // Número de habitantes
-  float area1, area2;             // Área em km²
-  float pib1, pib2;               // PIB da cidade
-  int pontos1, pontos2;           // Pontos turísticos
+  Objetivo:
+    - Manter duas cartas pré-definidas no código (sem entrada do usuário).
+    - Calcular Densidade Populacional = População / Área.
+    - Calcular PIB per capita = PIB / População (PIB em reais).
+    - Comparar apenas UM atributo escolhido via #define (sem menu/interação).
+    - Usar if / if-else para decidir a carta vencedora.
+    - Exibir o atributo comparado, os valores das duas cartas e o resultado.
 
-  // ===============================
-  // Área para entrada de dados
-  // ===============================
+  Observações:
+    - População é int, Área e PIB são float.
+    - Para Densidade Populacional: menor valor vence.
+    - Para os demais atributos: maior valor vence.
+*/
+
+// Seleção do atributo diretamente no código
+typedef enum {
+  ATTR_POPULACAO = 1,
+  ATTR_AREA      = 2,
+  ATTR_PIB       = 3,
+  ATTR_DENSIDADE = 4, // menor vence
+  ATTR_PIB_PC    = 5
+} CompareAttr;
+
+// Trocar aqui para comparar outro atributo
+#define SELECTED_ATTR ATTR_PIB_PC
+
+// Formata inteiro com pontos nos milhares (ex.: 12345678 -> "12.345.678")
+static void format_int_with_dots(int value, char out[]) {
+  char buf[32];
+  snprintf(buf, sizeof(buf), "%d", value);
+  int len = (int)strlen(buf);
+
+  int dotCount = (len - 1) / 3;
+  int outLen = len + dotCount;
+
+  out[outLen] = '\0';
+
+  int i = len - 1, j = outLen - 1, group = 0;
+  while (i >= 0) {
+    out[j--] = buf[i--];
+    group++;
+    if (group == 3 && i >= 0) {
+      out[j--] = '.';
+      group = 0;
+    }
+  }
+}
+
+int main(void) {
+  // ---------------------------------------------------------------------------
+  // Cartas pré-definidas
+  // ---------------------------------------------------------------------------
   // Carta 1
-  printf("====== Cadastro da Carta 1 ======\n");
-  printf("\nDigite a letra do Estado (A-H): ");
-  scanf(" %c", &estado1); // lê um caractere
-
-  printf("\nDigite o Codigo da Carta (exemplo: A01): ");
-  scanf(" %3s", codigo1); // lê até 3 caracteres para o código
-
-  printf("\nDigite o Nome da Cidade: ");
-  scanf(" %[^\n]", cidade1); // lê até encontrar ENTER (aceita espaços)
-
-  printf("\nDigite a Populacao da cidade: ");
-  scanf(" %d", &populacao1); // lê um número inteiro
-
-  printf("\nDigite a Area da cidade em km²: ");
-  scanf(" %f", &area1); // lê um número real (float)
-
-  printf("\nDigite o PIB da cidade: ");
-  scanf(" %f", &pib1); // lê um número real (float)
-
-  printf("\nDigite o Numero de Pontos Turisticos: ");
-  scanf(" %d", &pontos1); // lê um número inteiro
-
-  printf("\n");
-
-  printf("\n");
+  const char estado1[] = "GO";
+  const char codigo1[] = "G01";
+  const char cidade1[] = "Buriti Alegre";
+  int   populacao1 = 10000;         // habitantes
+  float area1      = 3000.0f;       // km²
+  float pib1       = 1.0e9f;        // reais (ex.: 1 bilhão = 1.0e9)
+  int   pontos1    = 3;
 
   // Carta 2
-  printf("====== Cadastro da Carta 2 ======\n");
-  printf("\nDigite a letra do Estado (A-H): ");
-  scanf(" %c", &estado2);  // lê um caractere
+  const char estado2[] = "MG";
+  const char codigo2[] = "M02";
+  const char cidade2[] = "Samonte";
+  int   populacao2 = 30000;
+  float area2      = 10000.0f;
+  float pib2       = 7.0e9f;        // 7 bilhões de reais
+  int   pontos2    = 5;
 
-  printf("\nDigite o Codigo da Carta (exemplo: B02): ");
-  scanf(" %3s", codigo2); // lê até 3 caracteres para o código
+  // ---------------------------------------------------------------------------
+  // Cálculos derivados
+  // ---------------------------------------------------------------------------
+  float densidade1 = (area1 > 0.0f) ? ((float)populacao1 / area1) : 0.0f;
+  float densidade2 = (area2 > 0.0f) ? ((float)populacao2 / area2) : 0.0f;
 
-  printf("\nDigite o Nome da Cidade: ");
-  scanf(" %[^\n]", cidade2); // lê até encontrar ENTER (aceita espaços)
+  float pibpc1 = (populacao1 > 0) ? (pib1 / (float)populacao1) : 0.0f;
+  float pibpc2 = (populacao2 > 0) ? (pib2 / (float)populacao2) : 0.0f;
 
-  printf("\nDigite a Populacao da cidade: ");
-  scanf(" %d", &populacao2); // lê um número inteiro
+  // ---------------------------------------------------------------------------
+  // Exibição das cartas
+  // ---------------------------------------------------------------------------
+  char pop1_fmt[40], pop2_fmt[40];
+  format_int_with_dots(populacao1, pop1_fmt);
+  format_int_with_dots(populacao2, pop2_fmt);
 
-  printf("\nDigite a Area da cidade em km²: ");
-  scanf(" %f", &area2); // lê um número real (float)
-
-  printf("\nDigite o PIB da cidade: ");
-  scanf(" %f", &pib2); // lê um número real (float)
-
-  printf("\nDigite o Numero de Pontos Turisticos: ");
-  scanf(" %d", &pontos2); // lê um número inteiro
-
- // ===============================
-  // Área para exibição dos dados
-  // ===============================
-  // Saída organizada, uma informação por linha, com descrições claras
   printf("\n========================================\n");
-  printf("     INFORMACOES DAS CARTAS CADASTRADAS \n");
+  printf("     INFORMACOES DAS CARTAS (pre-definidas)\n");
   printf("========================================\n");
 
   printf("\nCarta 1:\n");
-  printf("\nEstado: %c\n", estado1);
-  printf("\nCodigo: %s\n", codigo1);
-  printf("\nNome da Cidade: %s\n", cidade1);
-  printf("\nPopulacao: %d\n", populacao1);
-  printf("\nArea: %.2f km²\n", area1);
-  printf("\nPIB: %.2f bilhoes de reais\n", pib1);
-  printf("\nNumero de Pontos Turisticos: %d\n", pontos1);
+  printf("Estado: %s\n", estado1);
+  printf("Codigo: %s\n", codigo1);
+  printf("Cidade: %s\n", cidade1);
+  printf("Populacao: %s\n", pop1_fmt);
+  printf("Area: %.2f km²\n", area1);
+  printf("PIB: R$ %.2f\n", pib1);
+  printf("Pontos Turisticos: %d\n", pontos1);
+  printf("Densidade Populacional: %.2f hab/km²\n", densidade1);
+  printf("PIB per Capita: R$ %.2f\n", pibpc1);
 
-  printf("\n");
-  printf("========================================\n");
+  printf("\n----------------------------------------\n");
 
   printf("\nCarta 2:\n");
-  printf("\nEstado: %c\n", estado2);
-  printf("\nCodigo: %s\n", codigo2);
-  printf("\nNome da Cidade: %s\n", cidade2);
-  printf("\nPopulacao: %d\n", populacao2);
-  printf("\nArea: %.2f km²\n", area2);
-  printf("\nPIB: %.2f bilhoes de reais\n", pib2);
-  printf("\nNumero de Pontos Turisticos: %d\n", pontos2);
+  printf("Estado: %s\n", estado2);
+  printf("Codigo: %s\n", codigo2);
+  printf("Cidade: %s\n", cidade2);
+  printf("Populacao: %s\n", pop2_fmt);
+  printf("Area: %.2f km²\n", area2);
+  printf("PIB: R$ %.2f\n", pib2);
+  printf("Pontos Turisticos: %d\n", pontos2);
+  printf("Densidade Populacional: %.2f hab/km²\n", densidade2);
+  printf("PIB per Capita: R$ %.2f\n", pibpc2);
 
+  // ---------------------------------------------------------------------------
+  // Comparação de um único atributo (if / if-else)
+  // ---------------------------------------------------------------------------
+  float valor1 = 0.0f, valor2 = 0.0f;
+  const char* nomeAtributo = "";
+  int menorVence = 0; // 0 = maior vence; 1 = menor vence (densidade)
+
+  if (SELECTED_ATTR == ATTR_POPULACAO) {
+    valor1 = (float)populacao1;
+    valor2 = (float)populacao2;
+    nomeAtributo = "Populacao";
+    menorVence = 0;
+  } else if (SELECTED_ATTR == ATTR_AREA) {
+    valor1 = area1;
+    valor2 = area2;
+    nomeAtributo = "Area";
+    menorVence = 0;
+  } else if (SELECTED_ATTR == ATTR_PIB) {
+    valor1 = pib1;   // em reais
+    valor2 = pib2;
+    nomeAtributo = "PIB";
+    menorVence = 0;
+  } else if (SELECTED_ATTR == ATTR_DENSIDADE) {
+    valor1 = densidade1; // hab/km²
+    valor2 = densidade2;
+    nomeAtributo = "Densidade Populacional";
+    menorVence = 1; // MENOR vence
+  } else if (SELECTED_ATTR == ATTR_PIB_PC) {
+    valor1 = pibpc1; // R$ por habitante
+    valor2 = pibpc2;
+    nomeAtributo = "PIB per Capita";
+    menorVence = 0;
+  } else {
+    printf("\nAtributo de comparacao invalido.\n");
+    return 0;
+  }
+
+  // Exibição dos valores do atributo escolhido
+  printf("\n========================================\n");
+  printf("Comparacao de cartas (Atributo: %s)\n", nomeAtributo);
+  printf("========================================\n");
+
+  if (SELECTED_ATTR == ATTR_POPULACAO) {
+    printf("Carta 1 - %s (%s): %s\n", cidade1, estado1, pop1_fmt);
+    printf("Carta 2 - %s (%s): %s\n", cidade2, estado2, pop2_fmt);
+  } else if (SELECTED_ATTR == ATTR_AREA) {
+    printf("Carta 1 - %s (%s): %.2f km²\n", cidade1, estado1, area1);
+    printf("Carta 2 - %s (%s): %.2f km²\n", cidade2, estado2, area2);
+  } else if (SELECTED_ATTR == ATTR_PIB) {
+    printf("Carta 1 - %s (%s): R$ %.2f\n", cidade1, estado1, pib1);
+    printf("Carta 2 - %s (%s): R$ %.2f\n", cidade2, estado2, pib2);
+  } else if (SELECTED_ATTR == ATTR_DENSIDADE) {
+    printf("Carta 1 - %s (%s): %.2f hab/km²\n", cidade1, estado1, densidade1);
+    printf("Carta 2 - %s (%s): %.2f hab/km²\n", cidade2, estado2, densidade2);
+  } else if (SELECTED_ATTR == ATTR_PIB_PC) {
+    printf("Carta 1 - %s (%s): R$ %.2f\n", cidade1, estado1, pibpc1);
+    printf("Carta 2 - %s (%s): R$ %.2f\n", cidade2, estado2, pibpc2);
+  }
+
+  // Decisão de vitória (if / if-else)
+  if (menorVence == 1) {
+    // Densidade: menor vence
+    if (valor1 < valor2) {
+      printf("\nResultado: Carta 1 (%s) venceu!\n", cidade1);
+    } else if (valor2 < valor1) {
+      printf("\nResultado: Carta 2 (%s) venceu!\n", cidade2);
+    } else {
+      printf("\nResultado: Empate!\n");
+    }
+  } else {
+    // Demais atributos: maior vence
+    if (valor1 > valor2) {
+      printf("\nResultado: Carta 1 (%s) venceu!\n", cidade1);
+    } else if (valor2 > valor1) {
+      printf("\nResultado: Carta 2 (%s) venceu!\n", cidade2);
+    } else {
+      printf("\nResultado: Empate!\n");
+    }
+  }
+
+  printf("\n");
+  
   return 0;
 }
